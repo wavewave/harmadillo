@@ -37,10 +37,10 @@ let
 in
 
 stdenv.mkDerivation {
-  name = "hgdal-dev";
+  name = "harmadillo-dev";
 
   buildInputs = [
-    gdal
+    armadillo
     pkgconfig
     hsenv
   ];
