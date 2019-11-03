@@ -23,6 +23,7 @@ import FFICXX.Generate.Config         ( FFICXXConfig(..)
 import FFICXX.Generate.Type.Cabal     ( BuildType(..), Cabal(..), CabalName(..) )
 import FFICXX.Generate.Type.Config    ( ModuleUnit(..), ModuleUnitMap(..), ModuleUnitImports(..) )
 import FFICXX.Generate.Type.Class     ( Class(..)
+                                      , ClassAlias(..)
                                       , CTypes(CTDouble)
                                       , Function(..)
                                       , ProtectedMethod(..)
@@ -105,33 +106,40 @@ cabal = Cabal {
   , cabal_buildType          = Simple
   }
 
-armaclass :: String -> [Class] -> [Function] -> Class
-armaclass n ps fs =
+armaclass :: String -> String -> [Class] -> [Function] -> Class
+armaclass n a ps fs =
   Class {
       class_cabal      = cabal
     , class_name       = n
     , class_parents    = ps
     , class_protected  = Protected []
-    , class_alias      = Nothing
+    , class_alias      = Just $ ClassAlias { caHaskellName = a, caFFIName = n }
     , class_funcs      = fs
     , class_vars       = []
     , class_tmpl_funcs = []
     }
 
 
+arma_rng :: Class
+arma_rng =
+  armaclass "arma_rng" "ArmaRng"
+  []
+  [ Static void_ "set_seed_random" [] Nothing
+  ]
+
 classes =
-  [
+  [ arma_rng
   ]
 
 toplevelfunctions :: [TopLevelFunction]
 toplevelfunctions =
-  [
-  ]
+  []
+
 
 templates = []
 
 headers =
-  [
+  [ modImports "arma_rng" ["arma"] ["armadillo"]
   ]
 
 extraLib = []
