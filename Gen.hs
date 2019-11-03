@@ -27,7 +27,10 @@ import FFICXX.Generate.Type.Class     ( Class(..)
                                       , CTypes(CTDouble)
                                       , Function(..)
                                       , ProtectedMethod(..)
+                                      , TemplateClass(..)
+                                      , TemplateFunction(..)
                                       , TopLevelFunction(..)
+                                      , Types(..)
                                       , Variable(..)
                                       )
 import FFICXX.Generate.Type.Config    ( ModuleUnit(..)
@@ -106,14 +109,14 @@ cabal = Cabal {
   , cabal_buildType          = Simple
   }
 
-armaclass :: String -> String -> [Class] -> [Function] -> Class
-armaclass n a ps fs =
+armaclass :: String -> Maybe String -> [Class] -> [Function] -> Class
+armaclass n ma ps fs =
   Class {
       class_cabal      = cabal
     , class_name       = n
     , class_parents    = ps
     , class_protected  = Protected []
-    , class_alias      = Just $ ClassAlias { caHaskellName = a, caFFIName = n }
+    , class_alias      = fmap (\a -> ClassAlias { caHaskellName = a, caFFIName = n }) ma
     , class_funcs      = fs
     , class_vars       = []
     , class_tmpl_funcs = []
@@ -122,9 +125,15 @@ armaclass n a ps fs =
 
 arma_rng :: Class
 arma_rng =
-  armaclass "arma_rng" "ArmaRng"
+  armaclass "arma_rng" (Just "ArmaRng")
   []
   [ Static void_ "set_seed_random" [] Nothing
+  ]
+
+t_mat :: TemplateClass
+t_mat =
+  TmplCls cabal "Mat" "arma::Mat" "t"
+  [ TFun (TemplateType t_mat) "randu" "randu" [ uint "in_rows", uint "in_cols" ] Nothing
   ]
 
 classes =
@@ -133,10 +142,12 @@ classes =
 
 toplevelfunctions :: [TopLevelFunction]
 toplevelfunctions =
-  []
+  [
+  ]
 
-
-templates = []
+templates =
+  [ (t_mat, HdrName "armadillo")
+  ]
 
 headers =
   [ modImports "arma_rng" ["arma"] ["armadillo"]
